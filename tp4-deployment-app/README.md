@@ -30,7 +30,7 @@ oc describe bc <name>
 The script `s2i/sample-app-httpd/cleanall.sh` allows you to delete all the resources.  
 
 
-## Application deployment through Gitops model. 
+## Application deployment through Gitops model 
 
 ### Operators installation
 
@@ -96,7 +96,7 @@ kustomize build | oc apply -f -
 After issuing these commands, please proceed to the InstallPlan manual approval. 
 
 
-#### OpenShift Pipelines 
+#### OpenShift GitOps 
 ```sh 
 cd operators/gitops
 kustomize build | oc apply -f - 
