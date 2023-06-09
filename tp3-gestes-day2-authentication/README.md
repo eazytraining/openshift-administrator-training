@@ -6,8 +6,8 @@
 ```sh
 export HTPASSWD_SECRET_NAME=htpasswd-secret
 export HTPASSWD_SECRET=`htpasswd -n -B -b <username> <password> | base64 -w0`
-cat  ~/openshift-administrator-training/manifests/01-oauth-htpasswd.yaml | envsubst | oc apply -f -
-cat  ~/openshift-administrator-training/manifests/02-oauth-htpasswd.yaml | envsubst | oc replace -f - 
+cat  ~/openshift-administrator-training/okd-upi-install/manifests/01-oauth-htpasswd.yaml | envsubst | oc apply -f -
+cat  ~/openshift-administrator-training/okd-upi-install/manifests/02-oauth-htpasswd.yaml | envsubst | oc replace -f - 
 ```
 
 2. Assign the new user admin permissions
