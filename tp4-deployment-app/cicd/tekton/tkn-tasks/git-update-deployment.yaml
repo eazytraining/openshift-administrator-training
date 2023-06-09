@@ -72,7 +72,7 @@ spec:
         
         git config --global --add safe.directory $(workspaces.kustomize.path)/git-update-digest-work-dir
         
-        git config user.email "borisassogba@live.fr"
+        git config user.email "obiebent@gmail.com"
         git config user.name "My Tekton Bot"
 
         git status
