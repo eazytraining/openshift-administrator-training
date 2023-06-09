@@ -12,7 +12,7 @@ The BuildConfig created have a webhook trigger (GitLab webhook) to control the c
 - Create a secret with a reference to the webhook
 
 ```sh 
-export BASE64_GITLAB_WEBHOOT_SECRET=<secret-in-base64>
+export BASE64_GITHUB_WEBHOOT_SECRET=<secret-in-base64>
 export NAMESPACE=<target-namespace>
 
 cat ~/openshift-administrator-training/tp4-deployment-app/s2i/sample-app-httpd/openshift/templates/gitlab-secret-webhook.yaml | envsubst | oc apply -f -
@@ -24,7 +24,7 @@ cat ~/openshift-administrator-training/tp4-deployment-app/s2i/sample-app-httpd/o
 oc describe bc <name>
 ```
 - Copy the webhook URL, replacing <secret> with your secret value.
-- Follow the [GitLab setup instructions](https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#webhooks) to paste the webhook URL into your GitLab repository settings.
+- Follow the [GitLab setup instructions](https://docs.github.com/en/webhooks-and-events/webhooks/creating-webhooks) to paste the webhook URL into your GitLab repository settings.
 
 
 The script `s2i/sample-app-httpd/cleanall.sh` allows you to delete all the resources.  
@@ -148,7 +148,7 @@ sh cicd/tekton/pipeline.sh start
 In order to control the circumstances in which the tekton pipeline should run, a webhook configured at the GitLab server is mandatory. To configure the GitLab webhook, you should : 
 
 - Get the host URL of the EventListener (`oc get route <eventlistener-name> -n <target-namespace> -o json | jq -r '.spec.host'`)
-- Copy the host URL of the EventListener and follow the [GitLab setup instructions](https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#webhooks) to paste the webhook URL into your GitLab repository settings.
+- Copy the host URL of the EventListener and follow the [GitLab setup instructions](https://docs.github.com/en/webhooks-and-events/webhooks/creating-webhooks) to paste the webhook URL into your GitLab repository settings.
 
 
 #### Deployment 
