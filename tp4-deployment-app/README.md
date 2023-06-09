@@ -15,7 +15,7 @@ The BuildConfig created have a webhook trigger (GitLab webhook) to control the c
 export BASE64_GITLAB_WEBHOOT_SECRET=<secret-in-base64>
 export NAMESPACE=<target-namespace>
 
-cat s2i/sample-app-httpd/openshift/templates/gitlab-secret-webhook.yaml | envsubst | oc apply -f -
+cat ~/openshift-administrator-training/tp4-deployment-app/s2i/sample-app-httpd/openshift/templates/gitlab-secret-webhook.yaml | envsubst | oc apply -f -
 ```
 
 - Describe the BuildConfig to get the webhook URL: 
@@ -89,7 +89,7 @@ oc apply -f ~/openshift-administrator-training/okd-upi-install/manifests/catalog
 
 #### OpenShift Pipelines 
 ```sh 
-cd operators/pipelines
+cd ~/openshift-administrator-training/tp4-deployment-app/cicd/operators/pipelines
 kustomize build | oc apply -f - 
 ```
 
@@ -98,7 +98,7 @@ After issuing these commands, please proceed to the InstallPlan manual approval.
 
 #### OpenShift GitOps 
 ```sh 
-cd operators/gitops
+cd ~/openshift-administrator-training/tp4-deployment-app/cicd/operators/gitops
 kustomize build | oc apply -f - 
 ```
 
@@ -114,7 +114,7 @@ Manifests located into day2 folder set up the following features:
 
 ### Application Deployment 
 
-#### Application Build 
+#### Build & Push
 
 Before proceeding to the launch of the script `cicd/tekton/pipeline.sh`, it may be necessary to configure the secrets required for the service account  `pipeline-bot`
 
@@ -147,5 +147,14 @@ sh cicd/tekton/pipeline.sh start
 
 In order to control the circumstances in which the tekton pipeline should run, a webhook configured at the GitLab server is mandatory. To configure the GitLab webhook, you should : 
 
-- Get the host URL of the EventListener (`oc get route <eventlistener-name> <target-namespace> -o json | jq -r '.spec.host'`)
+- Get the host URL of the EventListener (`oc get route <eventlistener-name> -n <target-namespace> -o json | jq -r '.spec.host'`)
 - Copy the host URL of the EventListener and follow the [GitLab setup instructions](https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#webhooks) to paste the webhook URL into your GitLab repository settings.
+
+
+#### Deployment 
+
+Create the ArgoCD application for deployment the application. 
+
+```sh 
+oc apply -f~/openshift-administrator-training/tp4-deployment-app/argo/app.yaml
+```

@@ -4,18 +4,18 @@ metadata:
   name: gitops-dev-pipeline
 spec:
   params:
-    - default: 'http://gitlab.eazytraining.lab/boass/eazytraining.git'
+    - default: 'https://github.com/eazytraining/openshift-administrator-training.git'
       description: Source to the GIT
       name: git-url
       type: string
-    - default: develop
+    - default: main
       description: revision to be used
       name: git-revision
       type: string
     - name: config-git-url
       type: string
       description: URL of the Git config repository
-      default: 'git@gitlab.eazytraining.lab:boass/eazytraining-config.git'
+      default: 'git@github.com:eazytraining/openshift-administrator-training.git'
     - name: git-branch
       type: string
       description: Branch Git to be used
@@ -23,20 +23,20 @@ spec:
     - name: config-dir
       type: string
       description: Configuration directory within the config-git-url with the files
-      default: 'config/overlays/dev'
+      default: 'tp4-deployment-app/cicd/config/overlays/dev'
     - name: image-name
       type: string
       description: the name of the target image including registry
       default: image-registry.openshift-image-registry.svc:5000/eazytraining/dck_eazytraining-lab-http:1.0
     - name: git-user-name
       type: string
-      default: boass
+      default: ObieBent
       description: The Git username
     - name: git-user-email
       type: string
-      default: 'borisassogba@live.fr'
+      default: 'obiebent@gmail.com'
       description: The Git user email
-    - default: 'BuzzMusic_2023'
+    - default: ''               # Please provide your password
       name: git-password
       type: string
       description: The Git password
@@ -60,7 +60,7 @@ spec:
     - name: build-and-push-image
       params:
         - name: CONTEXT
-          value: "cicd/s2i/sample-app-httpd/docker"
+          value: "tp4-deployment-app/s2i/sample-app-httpd/docker"
         - name: IMAGE
           value: >-
             image-registry.openshift-image-registry.svc:5000/eazytraining/dck_eazytraining-lab-http:1.0

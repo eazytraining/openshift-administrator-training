@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment 
+metadata:
+  name: dep-eazytraining-httpd
+  labels: 
+    app: app-eazytraining-httpd
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels: 
+      app: app-eazytraining-httpd
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template: 
+    metadata:
+      labels: 
+        app: app-eazytraining-httpd
+    spec: 
+      containers: 
+      - name: eazytraining-httpd
+        imagePullPolicy: Always
+        image: image-registry.openshift-image-registry.svc:5000/eazytraining/dck_eazytraining-lab-http:1.0
+        ports: 
+        - containerPort: 8080
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 250m
+            memory: 250Mi
+          requests:
+            cpu: 250m
+            memory: 250Mi

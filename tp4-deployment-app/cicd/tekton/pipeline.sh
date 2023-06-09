@@ -5,11 +5,11 @@ set -e -u -o pipefail
 declare -r SCRIPT_DIR=$(cd -P $(dirname $0) && pwd)
 declare COMMAND="help"
 
-GIT_URL=http://gitlab.eazytraining.lab/boass/eazytraining.git
-GIT_REVISION=develop
+GIT_URL=https://github.com/eazytraining/openshift-administrator-training.git
+GIT_REVISION=main
 PIPELINE=gitops-dev-pipeline
 IMAGE_NAME=image-registry.openshift-image-registry.svc:5000/eazytraining/dck_eazytraining-lab-http:1.0
-GIT_USER_NAME=boass
+GIT_USER_NAME=ObieBent
 GIT_PASSWORD=
 TARGET_NAMESPACE=eazytraining
 
