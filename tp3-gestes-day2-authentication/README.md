@@ -13,7 +13,7 @@ cat  ~/openshift-administrator-training/okd-upi-install/manifests/02-oauth-htpas
 2. Assign the new user admin permissions
 ```sh
 export USER=<username>
-cat  ~/openshift-administrator-training/manifests/rbac-user-admin.yaml | envsubst | oc create -f - 
+cat  ~/openshift-administrator-training/okd-upi-install/manifests/rbac-user-admin.yaml | envsubst | oc create -f - 
 ```
 
 3. Wait until the cluster operator `authentication` become available 
