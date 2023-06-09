@@ -1,0 +1,175 @@
+---
+
+- name: Include per-environment variables
+  include_vars: '{{ item }}'
+  with_first_found:
+    - files:
+        - '{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml'           # CentOS-6.5
+        - '{{ ansible_os_family }}-{{ ansible_distribution_version }}.yml'              # RedHat-6.5
+        - '{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml'     # CentOS-6
+        - '{{ ansible_os_family }}-{{ ansible_distribution_major_version }}.yml'        # RedHat-6
+        - '{{ ansible_distribution }}.yml'                                              # CentOS
+        - '{{ ansible_os_family }}.yml'                                                 # RedHat
+        - 'main.yml'
+      paths: '../vars'
+  tags: always
+
+- include: dns.yml
+  tags: manage_dns
+
+- include: hostname.yml
+  when: manage_hostname
+
+- include: "{{ ansible_os_family }}.yml"
+
+- name: main | Create .bashrc.d directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - /root/.bashrc.d
+    - /etc/bash.bashrc.d
+
+- name: main | Copy configuration bashrc templates
+  template:
+    src:  "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 0644
+  with_items:
+    - src: root.bashrc.d.default.j2
+      dest: /root/.bashrc.d/default
+    - src: user.bashrc.d.default.j2
+      dest: /etc/bash.bashrc.d/default
+
+- name: main | Copy bashrc prompt script displaying site info {{ ansible_fqdn }}
+  template:
+    src:  etc/bash.bashrc.d/site
+    dest: /etc/bash.bashrc.d/site
+    mode: 0644
+  when: promptsite_tag is defined
+  tags:
+    - prompt
+
+- name: main | Add source .bashrc.d in bashrc
+  lineinfile:
+    dest:   "{{ item.conf }}"
+    regexp: '-x {{ item.dir_d }}'
+    create: yes
+    line:   '[[ -x {{ item.dir_d }} ]] && for file in `ls {{ item.dir_d }}/* 2>/dev/null`; do source $file; done'
+  with_items:
+    - conf: /root/.bashrc
+      dir_d: ~/.bashrc.d
+    - conf: /etc/bashrc
+      dir_d: /etc/bash.bashrc.d
+
+- include: generate_hosts.yml
+  when: generate_hosts_from_inventory == true
+
+- name: main | Install extra packages
+  package:
+    name: "{{ extra_packages | join(',') }}"
+  when: extra_packages | length > 0
+
+- name: main | Install basic packages
+  package:
+    name: "{{ basic_packages | join(',') }}"
+
+- name: main | Install packages for hosts
+  package:
+    name:  "{{ item }}"
+  when: ansible_virtualization_role == "host"
+  with_items:
+    - "{{ host_packages }}"
+
+- name: main | Remove unwanted packages
+  package:
+    name:  "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ remove_packages }}"
+    - "{{ extra_remove_packages }}"
+
+- name: main | Copy custom profile
+  template:
+    src: "etc.profile.d.custom.sh"
+    dest: /etc/profile.d/custom.sh
+
+- name: main | Change root gecos
+  user:
+    name:    root
+    comment: "root-{{ hostname }}"
+
+- name: main | Change root password
+  user:
+    name:     root
+    password: "{{ root_password }}"
+  when: root_password is defined
+  tags:
+    - root_password
+
+- name: main | Deploy powerfull admin script
+  copy:
+    src:   "etc/bash.bashrc.d/{{ item }}"
+    dest:  "/etc/bash.bashrc.d/{{ item }}"
+    owner: root
+    group: root
+    mode:  0644
+  with_items:
+    - disk
+    - mip
+    - net
+    - nofile
+    - swaptop
+  when: copy_admin_scripts
+
+- name: main | Stop and disabled service
+  service:
+    name:    "{{ item }}"
+    state:   stopped
+    enabled: no
+  with_items: "{{ service_disabled }}"
+
+- include: ssh.yml
+  tags:
+    - config
+    - ssh_config
+
+- include: atop.yml
+  when: atop_enable
+  tags:
+    - config
+    - atop
+
+- include: logrotate.yml
+  when: logrotate_enable
+  tags:
+    - config
+    - logrotate
+
+- name: main | Upgrade all packages
+  package:
+    name: "*"
+    state: latest
+  when: update_all_packages
+  register: packages_upgrade
+
+- name: preseed | Reboot server
+  shell: sleep 2 && shutdown -r now
+  async: 1
+  poll: 0
+  ignore_errors: True
+  register: rebooting
+  when:
+   - update_all_packages
+   - packages_upgrade is changed
+
+- name: preseed | Waiting for server to reboot
+  become: false
+  wait_for:
+    host: "{{ ansible_ssh_host }}"
+    port: 22
+    delay: 10
+    timeout: 120
+    connect_timeout: 5
+  delegate_to: localhost
+  when: update_all_packages

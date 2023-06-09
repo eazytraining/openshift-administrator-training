@@ -1,0 +1,14 @@
+---
+
+- name: "Ldap User Infos | Get user infos for {{ user }}"
+  set_fact:
+    user_infos: "{{ lookup('ldapuser', user ) }}"
+  ignore_errors: yes # Ignore not found users
+
+- name: "Ldap  User Infos | Pick the important informations"
+  set_fact:
+    infos: "{{ { 'login': user, 'groups': ldap_users_groups, 'sshkeys': user_infos.sshPublicKey|default([]), 'mail': user_infos.mail[0]|default(''), 'name': user_infos.cn[0]|default(user) } }}"
+
+- name: "Ldap  User Infos | Concatenate users"
+  set_fact:
+    users: "{{ users + [infos]}}"

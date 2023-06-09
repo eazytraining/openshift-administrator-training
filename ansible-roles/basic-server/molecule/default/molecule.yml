@@ -1,0 +1,46 @@
+---
+dependency: 
+  name: galaxy
+driver: 
+  name: delegated
+  options: 
+    managed: False
+    login_cmd_template: 'docker container exec -it {instance} bash'
+    ansible_connection_options: 
+      ansible_connection: docker
+lint: |
+  yamllint .
+  set -e
+  ansible-lint
+platforms: 
+  - name: rocky
+    image: "rockylinux/rockylinux:latest"
+    command: ${MOLECULE_DOCKER_COMMAND:-"/usr/sbin/init"}
+    volumes:  
+      - /sys/fs/cgroup: /sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+    capabilities: 
+      - SYS_ADMIN
+provisioner: 
+  name: ansible
+  logs: True
+  config_options: 
+    diff: 
+      always: yes
+  playbooks:
+    prepare: prepare.yml 
+    converge: converge.yml
+scenario: 
+  name: default
+  test_sequence: 
+    - lint
+    - destroy
+    - syntax
+    - create
+    - converge
+    - indempotence
+    - verify
+    - destroy
+verifier: 
+  name: ansible

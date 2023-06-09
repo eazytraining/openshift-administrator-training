@@ -1,0 +1,85 @@
+---
+
+- name: "RedHat | Enabling {{ yum_enabled_plugins | join(', ') }} yum plugins"
+  ini_file:
+    dest: "/etc/yum/pluginconf.d/{{ item }}.conf"
+    section: main
+    option: enabled
+    value: "1"
+  with_items: "{{ yum_enabled_plugins }}"
+
+- name: "RedHat | Disabling {{ yum_disabled_plugins | join(', ') }} yum plugins"
+  ini_file:
+    dest: "/etc/yum/pluginconf.d/{{ item }}.conf"
+    section: main
+    option: enabled
+    value: "0"
+  with_items: "{{ yum_disabled_plugins }}"
+
+- name: Redhat | Ensure firewalld is installed
+  package:
+    name: firewalld
+    state: present
+  when: manage_firewalld == true and ansible_distribution_version >= '7'
+
+- name: RedHat | Start and enable firewalld
+  service:
+    name: firewalld
+    state: started
+    enabled: yes
+  when: manage_firewalld == true and ansible_distribution_version >= '7'
+
+- name: RedHat | Set default locale
+  template:
+    src: etc.locale.conf.j2
+    dest: /etc/locale.conf
+  register: locale_conf
+  when: manage_locales
+
+- name: RedHat | set locales
+  command: localectl set-locale LANG={{ default_locale }}
+  when:
+    - manage_locales
+    - locale_conf.changed
+
+# Remove NetworkManager
+- name: RedHat | Check if NetworkManager is installed
+  yum:
+    list: NetworkManager
+  register: nm_pkg
+  when: disable_network_manager
+
+- name: RedHat | Stop and disable NetworkManager Service
+  service:
+    name: NetworkManager
+    state: stopped
+    enabled: no
+  ignore_errors: True
+  when: disable_network_manager and nm_pkg.results|selectattr("yumstate", "match", "installed")|list|length != 0
+
+- name: RedHat | Remove NetworkManager Package
+  package:
+    name: NetworkManager
+    state: absent
+  register: network_manager_removed
+  when: disable_network_manager and nm_pkg.results|selectattr("yumstate", "match", "installed")|list|length != 0
+
+- name: RedHat | Install EPEL repository
+  package:
+    name: epel-release
+  when: install_epel | bool
+
+- name: RedHat | Install moreutils on RedHat-7
+  package:
+    name: moreutils
+  when:
+    - install_epel | bool
+    - ansible_distribution_major_version <= '7'
+
+- name: RedHat | Install moreutils on RedHat-8
+  dnf:
+    name: moreutils
+    enablerepo: powertools,PowerTools
+  when:
+    - install_epel | bool
+    - ansible_distribution_major_version >= '8'

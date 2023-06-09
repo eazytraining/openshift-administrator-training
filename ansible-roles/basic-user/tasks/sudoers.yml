@@ -1,0 +1,19 @@
+---
+- name: sudoers | Create sudoers file {{ key }}
+  tags:
+    - create_userss
+    - setup_sudoers
+  template:
+    src:   etc.sudoers.d.default.j2
+    dest:  "/etc/sudoers.d/{{ key }}"
+    mode:  0440
+  when: values.state|default('') != "absent"
+
+- name: sudoers | Delete sudoers file {{ key }}
+  tags:
+    - create_users
+    - setup_sudoers
+  file:
+    path:  "/etc/sudoers.d/{{ key }}"
+    state: absent
+  when: values.state|default('') == "absent"

@@ -1,0 +1,66 @@
+---
+# Prompt customization
+rootpromptcolor: red
+userpromptcolor: green
+promptbold: "{{ ansible_virtualization_role==\"host\" }}"
+#promptsite_tag:
+promptsite_sep: "#"
+
+#{{ ansible_fqdn|split['.'][2] }}
+# Global configuration
+generate_hosts_from_inventory: true
+default_locale: "en_US.UTF-8"
+manage_locales: true
+main_interface: "{{ ansible_default_ipv4.interface }}"
+user_default_shell: "/bin/bash"
+yum_disabled_plugins:
+  - fastestmirror
+yum_enabled_plugins: []
+extra_packages: []
+extra_remove_packages: []
+install_epel: true
+install_sudoers: true
+manage_firewalld: true
+
+disable_network_manager: false
+sudo_lines: []
+copy_admin_scripts: false
+historytime_format: "%Y/%m/%d - %H:%M:%S "
+
+# Hostname
+hostname: "{{ ansible_hostname }}"
+manage_hostname: true
+remove_loopback_hostname_entry: true
+hosts_entry: []
+# - ip: 10.1.1.1
+#   fqdn: myhostname.domain.com
+#   hostname: myhostname
+
+# DNS parameter
+manage_dns: false
+dns_domain: NULL
+dns_search: []
+dns_servers:
+  - 8.8.8.8
+
+# SSH parameter
+ssh_enable_passwd_auth: "yes"
+ssh_enable_root_login: "yes"
+ssh_use_dns: "yes"
+
+# ATOP parameter
+atop_enable: True
+atop_interval: 600
+atop_retention_day: 21
+
+# Upgrade all packages
+update_all_packages: false
+
+# Service to disable at boot
+service_disabled: []
+
+# Logrotate options
+logrotate_enable: true
+logrotate_compress: true
+logrotate_period: "weekly"
+logrotate_rotate: "4"

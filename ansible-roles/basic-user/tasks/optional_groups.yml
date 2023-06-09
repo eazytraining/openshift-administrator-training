@@ -1,0 +1,17 @@
+---
+- name: optional_groups | Get server group list
+  shell: /usr/bin/getent group | awk -F":" '{print $1}'
+  register: etc_groups
+  check_mode: no
+  changed_when: false
+  tags:
+    - create_optional_groups
+
+- name: optional_groups | Add optionnal groups to {{ user }}
+  user:
+    name:   "{{ user }}"
+    groups: "{{ item }}"
+    append: yes
+  with_items: "{{ group_list | intersect(etc_groups.stdout_lines) | join(',') }}"
+  tags:
+    - create_optional_groups

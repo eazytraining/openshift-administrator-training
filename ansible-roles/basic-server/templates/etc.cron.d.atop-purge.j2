@@ -1,0 +1,1 @@
+1 0 * * * root find /var/log/atop/ -name "atop_*" -mtime +{{ atop_retention_day }} -exec rm {} \;

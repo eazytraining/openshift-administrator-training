@@ -1,0 +1,95 @@
+---
+
+- name: main | install python-ldap
+  package:
+    name: python-ldap
+  delegate_to: localhost
+  when: ldap_users | length > 0
+  run_once: true
+
+- include: ldap_user_infos.yml
+  with_items:
+    - "{{ ldap_users }}"
+  loop_control:
+    loop_var: user
+
+- name: main | Create groups
+  group:
+    name:  "{{ item.name }}"
+    state: "{{ item.state|default('present') }}"
+  with_items:
+    - "{{ users_groups|default([]) }}"
+  tags:
+    - create_users
+    - create_groups
+
+- name: main | Create users
+  user:
+    name:     "{{ item.login }}"
+    comment:  "{{ item.comment|default(item.mail|default(omit)) }}"
+    group:    "{{ item.group|default(omit) }}"
+    groups:   "{{ item.groups|default(omit) }}"
+    state:    "{{ item.state|default('present') }}"
+    shell:    "{{ item.shell| default(user_default_shell) }}"
+    password: "{{ item.password|default(omit) }}"
+    force: yes
+    remove: yes
+    append: yes
+  with_items:
+    - "{{ users|default([]) }}"
+  tags:
+    - create_users
+
+- name: main | Add ssh users keys
+  authorized_key:
+    user:  "{{ item.0.login }}"
+    state: "{{ item.0.state|default('present') }}"
+    key:   "{{ item.1 | default(omit) }}"
+  with_subelements:
+    - "{{ users|default({}) }}"
+    - "sshkeys"
+    - flags:
+      skip_missing: True
+  tags:
+    - create_users
+    - create_sshkeys
+  ignore_errors: yes
+  when: item.0.state|default('present') is defined and item.0.state|default('present') == 'present'
+
+- name: main | Revoke ssh users keys
+  authorized_key:
+    user:  "{{ item.0.login }}"
+    state: absent
+    key:   "{{ item.1 }}"
+  with_subelements:
+    - "{{ users|default({}) }}"
+    - "sshkeys_revoke"
+    - flags:
+      skip_missing: True
+  tags:
+    - create_users
+    - revike_sshkeys
+  ignore_errors: yes
+  when: item.0.state is defined and item.0.state == 'present'
+
+- name: main | Setup sudoers
+  include: "sudoers.yml key={{ sudoers_list.key }} values={{ sudoers_list.value }}"
+  with_dict: "{{ sudoers | default({}) }}"
+  loop_control:
+    loop_var: sudoers_list
+  tags:
+    - create_users
+    - setup_sudoers
+
+- name: main | Add optionnal groups only if exists
+  include: "optional_groups.yml user={{ u.login }} group_list={{ u.opt_groups|default([]) }}"
+  loop_control:
+    loop_var: u
+  with_items: "{{ users|default([]) }}"
+  when:
+    - u.state is defined
+    - u.state == 'present'
+    - u.opt_groups|default([]) | length > 0
+  tags:
+    - create_users
+    - create_optional_groups

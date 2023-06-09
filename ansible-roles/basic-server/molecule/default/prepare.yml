@@ -1,0 +1,12 @@
+--- 
+- hosts: all
+  tasks: 
+    - name: "Install Firewalld"
+      dnf: 
+        name: firewalld
+        state: present
+
+    - name: "Start Firewalld"
+      systemd: 
+        name: firewalld
+        state: started

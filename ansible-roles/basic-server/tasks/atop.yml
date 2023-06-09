@@ -1,0 +1,37 @@
+---
+- name: atop | Install package
+  package:
+    name: atop
+
+- name: atop | Deploy default configuration file
+  template:
+    src:  etc.sysconfig.atop.j2
+    dest: "{{ atop_config_file }}"
+  notify:
+    restart atop
+
+- name: atop | Check if atop use systemd timer to rotage log file
+  stat:
+    path: /usr/lib/systemd/system/atop-rotate.service
+  register: atop_timer
+
+- name: atop | Deploy crontab to purge file
+  template:
+    src:  etc.cron.d.atop-purge.j2
+    dest: /etc/cron.d/atop-purge
+  when:
+    - not atop_timer.stat.exists
+
+- name: atop | Enable and start service
+  service:
+    name:    atop
+    state:   started
+    enabled: yes
+
+- name: atop | Enable and start atop rotate timer
+  service:
+    name:    atop-rotate.timer
+    state:   started
+    enabled: yes
+  when:
+    - atop_timer.stat.exists

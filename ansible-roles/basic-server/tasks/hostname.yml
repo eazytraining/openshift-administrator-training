@@ -1,0 +1,9 @@
+---
+- name: hostname | configure hostname in /etc/hostname
+  template:
+    src:  etc.hostname.j2
+    dest: /etc/hostname
+  notify:
+    - "reload hostname {{ ansible_os_family }}"
+  tags:
+    - manage_hostname

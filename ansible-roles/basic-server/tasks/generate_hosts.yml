@@ -1,0 +1,36 @@
+---
+- name: generate host | "Ensure the system can resolve itself"
+  lineinfile:
+    dest: /etc/hosts
+    regexp: ".* {{ hostname }}$"
+    insertafter: yes
+    line: "{{ hostvars[inventory_hostname]['ansible_' + main_interface]['ipv4']['address'] }} {% if dns_domain|bool %}{{ hostname }}.{{ dns_domain }}{% else %}{{ ansible_fqdn }}{% endif %} {{ hostname }}"
+    state: present
+  tags:
+    - generate_hosts
+    - install
+    - update_config
+
+- name: generate host | Remove 127.0.0.1 {{ hostname }}
+  lineinfile:
+    dest: /etc/hosts
+    regexp: "127.0.0.1.*{{ hostname }}$"
+    state: absent
+  when: remove_loopback_hostname_entry
+  tags:
+    - install
+    - update_config
+
+- name: generate host | Add custom host entry
+  lineinfile:
+    dest: /etc/hosts
+    regexp: ".* {{ item.hostname }}$"
+    line: "{{ item.ip }} {{ item.fqdn }} {{ item.hostname }}"
+    insertafter: yes
+    state: present
+  with_items: "{{ hosts_entry | default([]) }}"
+  tags:
+    - install
+    - update_config
+    - update_hosts
+

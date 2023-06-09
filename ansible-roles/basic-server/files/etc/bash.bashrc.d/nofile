@@ -1,0 +1,5 @@
+nofile () {
+  head="NFI\tPNAME\tPID\tUSER"
+  output=`lsof 2> /dev/null | awk '$4 ~ /[0-9]+[rwu -].*/{p[$1"\t"$2"\t"$3]=p[$1"\t"$2"\t"$3]+1}END{for (i in p) print p[i],i}' | sort -nr | head`
+  echo -e "$head\n$output" | column -t
+}

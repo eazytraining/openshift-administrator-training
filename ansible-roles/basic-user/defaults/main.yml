@@ -1,0 +1,19 @@
+---
+
+user_default_shell: "/bin/bash"
+users_groups: []
+users: []
+sudoers: {}
+#  centreon:
+#    - centreon ALL=(ALL)        NOPASSWD: /usr/lib/nagios/plugins-ssh/check_bind_stats
+#    - centreon ALL=(ALL)        NOPASSWD: /usr/lib/nagios/plugins-nrpe/check_mysql_health
+#    - centreon ALL=(zimbra)     NOPASSWD: /usr/lib/nagios/plugins-nrpe/check_zimbra_spamcount
+#  dev:
+#    - %dev ALL=(root) NOPASSWD: systemctl httpd reload
+#    - %dev ALL=(root) NOPASSWD: systemctl tomcat reload
+
+
+# LDAP
+
+ldap_users: []
+ldap_users_groups: []

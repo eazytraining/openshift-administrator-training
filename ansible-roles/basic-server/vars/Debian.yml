@@ -1,0 +1,36 @@
+---
+basic_packages:
+  - ca-certificates
+  - bash-completion
+  - diffutils
+  - file
+  - iproute2
+  - less
+  - lsof
+  - moreutils
+  - patch
+  - psmisc
+  - rsync
+  - screen
+  - ssh
+  - ssl-cert
+  - strace
+  - sudo
+  - tcpdump
+  - unzip
+  - vim
+
+host_packages:
+  - acpid
+  - tcpdump
+  - iotop
+  - dstat
+
+remove_packages:
+  - locate
+  - mlocate
+  - nano
+  - openbsd-inetd
+
+ssh_service: sshd
+atop_config_file: /etc/default/atop

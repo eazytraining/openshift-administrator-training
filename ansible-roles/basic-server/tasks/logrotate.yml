@@ -1,0 +1,31 @@
+---
+- name: logrotate | Ensure logrotate is installed log compression
+  package:
+    name: logrotate
+  when:
+    - logrotate_enable | bool
+
+- name: logrotate | Enable log compression
+  lineinfile:
+    dest: /etc/logrotate.conf
+    regexp: "^#?compress"
+    line: "compress"
+  when:
+    - logrotate_enable | bool
+    - logrotate_compress | bool
+
+- name: logrotate | Configure log rotation to {{ logrotate_period }}
+  lineinfile:
+    dest: /etc/logrotate.conf
+    regexp: "^(daily|weekly|monthly)"
+    line: "{{ logrotate_period }}"
+  when:
+    - logrotate_enable | bool
+
+- name: logrotate | Configure log retention to {{ logrotate_rotate }}
+  lineinfile:
+    dest: /etc/logrotate.conf
+    regexp: "^#?rotate.*"
+    line: "rotate {{ logrotate_rotate }}"
+  when:
+    - logrotate_enable | bool

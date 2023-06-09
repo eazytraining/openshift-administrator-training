@@ -1,0 +1,57 @@
+---
+- name: dns | Deploy resolv.conf
+  template:
+    src: etc.resolv.conf.j2
+    dest: /etc/resolv.conf
+  when: manage_dns == True
+  tags: deploy_dns
+
+- name: dns | Disable DNS servers parameters in network configuration
+  lineinfile:
+    path:   "/etc/sysconfig/network-scripts/ifcfg-{{ item }}"
+    regexp: '^DNS.?=.*'
+    state:  absent
+  with_items:
+    - "{{ ansible_interfaces }}"
+  when:
+    - manage_dns == True
+    - ansible_os_family == "RedHat"
+  tags: deploy_dns
+
+- name: dns | Prevent NetworkManager to modify DNS configuration (i.e /etc/resolv.conf)
+  ini_file:
+    path:    "/etc/NetworkManager/NetworkManager.conf"
+    section: "main"
+    option:  "{{ item.key }}"
+    value:   "{{ item.value }}"
+  with_items:
+    - key: dns
+      value: none
+    - key: rc-manager
+      value: unmanaged
+  when:
+    - manage_dns == True
+    - not disable_network_manager
+  notify:
+    - reload NetworkManager
+  tags: deploy_dns
+
+- name: dns | Update DNS search
+  lineinfile:
+    dest:   /etc/resolv.conf
+    regexp: "^search.*"
+    line:   "search {%- for search in dns_search %} {{ search }}{% endfor %}"
+  when: dns_search and manage_dns == False
+  tags: deploy_dns
+
+- name: dns | Disable DNS domain parameter in network configuration
+  lineinfile:
+    path:   "/etc/sysconfig/network-scripts/ifcfg-{{ item }}"
+    regexp: '^DOMAIN=.*'
+    state:  absent
+  with_items:
+    - "{{ ansible_interfaces }}"
+  when:
+    - dns_search and manage_dns == True
+    - ansible_os_family == "RedHat"
+  tags: deploy_dns

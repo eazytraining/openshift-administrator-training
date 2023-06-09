@@ -1,0 +1,9 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Importing role"
+      include_role:
+        name: basic-server
+      vars:
+        update_all_packages: true
