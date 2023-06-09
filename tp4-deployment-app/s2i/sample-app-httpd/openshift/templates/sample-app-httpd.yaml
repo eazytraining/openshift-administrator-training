@@ -1,0 +1,229 @@
+####
+#
+# OpenShift template. 
+#
+# Parameters are listes at the end of this file. 
+#
+####
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: sample-app-httpd
+  annotations:
+    description: "Sample Apache Server (httpd) application that serves static content"
+  message: "The following service(s) have been created in your project: ${NAME}. \n"
+  labels: 
+    template: sample-app-httpd
+    app: app-${APPLICATION_NAME}
+objects: 
+  - apiVersion: v1 
+    kind: Namespace
+    metadata: 
+      name: ${NAME}
+      labels: 
+         project: eazytraining
+    spec: {}
+  - apiVersion: v1 
+    kind: Service
+    metadata:
+      labels:
+        app: app-${APPLICATION_NAME}
+      name: svc-${APPLICATION_NAME}
+    spec:
+      ports:
+        - name: 8080-tcp
+          port: 8080
+          protocol: TCP
+          targetPort: 8080
+      selector:
+        app: app-${APPLICATION_NAME}
+      sessionAffinity: None
+      type: ClusterIP
+    status:
+      loadBalancer: {}
+  - apiVersion: v1
+    kind: Route
+    metadata:
+      labels:
+        app: app-${APPLICATION_NAME}
+      name: route-${APPLICATION_NAME}
+    spec:
+      port:
+        targetPort: 8080
+      to:
+        kind: Service
+        name: svc-${APPLICATION_NAME}
+        weight: 100
+  - apiVersion: image.openshift.io/v1
+    kind: ImageStream
+    metadata:
+      labels:
+        app: ${IMAGE_STREAM_NAME}
+      name: ${IMAGE_STREAM_NAME}
+      annotations:
+        description: "Keeps track of changes in the application image"
+  - apiVersion: v1 
+    kind: BuildConfig 
+    metadata: 
+      labels: 
+        app: dck-${IMAGE_NAME}-${IMAGE_TAG}
+      name: dck-${IMAGE_NAME}-${IMAGE_TAG}
+    spec: 
+      completionDeadlineSecond: 1800
+      failedBuildsHistoryLimit: 3
+      successfulBuildsHistoryLimit: 2
+      output:
+        to:
+          kind: ImageStreamTag
+          name: dck_${IMAGE_NAME}:${IMAGE_TAG}
+      source: 
+        git:
+          ref: "${GIT_BRANCH}"
+          uri: ${GIT_URL}
+        type: Git
+        contextDir: "cicd/s2i/sample-app-httpd/docker"
+      strategy:
+        dockerStrategy:
+          dockerfilePath: Dockerfile
+          forcePull: true
+          noCache: true
+          from:
+            kind: ImageStreamTag
+            name: ${SOURCE_IMAGE}
+            namespace: ${FROM_NAMESPACE}
+        type: Docker
+      triggers:
+        - type: ImageChange
+          imageChange: {}
+        - type: "GitLab"
+          gitlab: 
+            secretReference: 
+              name: "gitlab-webhook-secret"
+  - apiVersion: apps.openshift.io/v1
+    kind: DeploymentConfig
+    metadata:
+      labels:
+        app: app-${APPLICATION_NAME}
+      name: dc-${APPLICATION_NAME}
+    spec:
+      revisionHistoryLimit: 5
+      replicas: 2
+      selector:
+        app: app-${APPLICATION_NAME}
+      strategy:
+        activeDeadlineSeconds: 21600
+        resources: {}
+        rollingParams:
+          intervalSeconds: 1
+          maxSurge: 50%
+          maxUnavailable: 50%
+          timeoutSeconds: 600
+          updatePeriodSeconds: 1
+        type: Rolling
+      template:
+        metadata:
+          labels:
+            app: app-${APPLICATION_NAME}
+            deploymentconfig: dc-${APPLICATION_NAME}
+        spec:
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - podAffinityTerm:
+                    labelSelector:
+                      matchExpressions:
+                        - key: app
+                          operator: In
+                          values:
+                            - app-${APPLICATION_NAME}
+                    topologyKey: site
+                  weight: 100
+          containers:
+            - name: ${APPLICATION_NAME}
+              ports: 
+                - containerPort: 8080
+                  protocol: TCP
+              livenessProbe:
+                exec:
+                  command:
+                    - /usr/bin/pgrep
+                    - httpd
+                failureThreshold: 3
+                initialDelaySeconds: 60
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 1
+              readinessProbe:
+                exec:
+                  command:
+                    - /usr/bin/pgrep
+                    - httpd
+                failureThreshold: 3
+                initialDelaySeconds: 10
+                periodSeconds: 10
+                successThreshold: 1
+                timeoutSeconds: 1
+              resources:
+                limits:
+                  cpu: 250m
+                  memory: 250Mi
+                requests:
+                  cpu: 250m
+                  memory: 250Mi
+              image: ${FROM_IMAGE}
+      test: false
+      triggers:
+        - type: ConfigChange
+        - imageChangeParams:
+            automatic: true
+            containerNames:
+              - ${APPLICATION_NAME}
+            from:
+              kind: ImageStreamTag
+              name: ${FROM_IMAGE}
+          type: ImageChange
+parameters:
+  - name: NAME
+    required: true
+    description: name of the namespace
+    value: eazytraining
+  - name: APPLICATION_NAME
+    required: true
+    value: "eazytraining-httpd"
+  - name: IMAGE_STREAM_NAME
+    description: Name of the image stream
+    value: "dck_eazytraining-lab-http" 
+    required: true
+  - name: IMAGE_NAME
+    description: Name of the image
+    value: "eazytraining-lab-http" 
+    required: true
+  - name: GIT_BRANCH
+    description: Source Repository branch 
+    value: "main" 
+    required: true
+  - name: IMAGE_TAG
+    description: Image Tag
+    value: "1.0"
+    required: true
+  - name: GIT_URL
+    description: Source Repository URL
+    value: "http://gitlab.eazytraining.lab/admin-boass/eazytraining.git" 
+    required: true
+  - name: BUILD_SECRET
+    description: A secret string used to configure the build webhooks.
+    displayName: Webhook Secret for builds
+    required: true
+    value: github-secret-webhook
+  - name: FROM_NAMESPACE
+    description: Source namespace
+    value: "openshift"
+    required: true
+  - name: SOURCE_IMAGE
+    description: Source image 
+    value: "httpd:2.4" 
+    required: true
+  - name: FROM_IMAGE
+    description: Source image 
+    value: "dck_eazytraining-lab-http:1.0"
