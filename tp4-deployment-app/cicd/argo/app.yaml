@@ -10,8 +10,8 @@ spec:
     server: 'https://kubernetes.default.svc'
   project: default
   source:
-    path: config/overlays/dev
-    repoURL: http://gitlab.eazytraining.lab/boass/eazytraining-config.git
+    path: tp4-deployment-app/cicd/config/overlays/dev
+    repoURL: https://github.com/eazytraining/openshift-administrator-training.git
     targetRevision: main
   syncPolicy:
     automated:
