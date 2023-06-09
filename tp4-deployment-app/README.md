@@ -9,7 +9,8 @@ The script `s2i/sample-app-httpd/sample-app-httpd.sh` allows you to deploy a CI/
 
 The BuildConfig created have a webhook trigger (GitLab webhook) to control the circumstances in which the BuildConfig should be run. To configure the GitLab webhook, you should : 
 
-- Create a secret with a reference to the webhook 
+- Create a secret with a reference to the webhook
+
 ```sh 
 export BASE64_GITLAB_WEBHOOT_SECRET=<secret-in-base64>
 export NAMESPACE=<target-namespace>
@@ -18,6 +19,7 @@ cat s2i/sample-app-httpd/openshift/templates/gitlab-secret-webhook.yaml | envsub
 ```
 
 - Describe the BuildConfig to get the webhook URL: 
+
 ```sh 
 oc describe bc <name>
 ```
@@ -25,4 +27,4 @@ oc describe bc <name>
 - Follow the GitLab setup instructions (https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#webhooks) to paste the webhook URL into your GitLab repository settings.
 
 
-The script `s2i/sample-app-httpd/cleanall.sh` allows you to delete all the resources. 
+The script `s2i/sample-app-httpd/cleanall.sh` allows you to delete all the resources.  
