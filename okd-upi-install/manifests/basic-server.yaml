@@ -1,0 +1,32 @@
+---
+- hosts: all
+  roles:
+    - role: basic-server
+      install_epel: false
+      manage_firewalld: true
+      rootpromptcolor: magenta
+      userpromptcolor: yellow
+      atop_enable: false
+      copy_admin_scripts: true
+      ssh_enable_passwd_auth: "no"
+      ssh_enable_root_login: "no"
+      ssh_use_dns: "no"
+    - role: basic-user
+      tags: user
+      users_groups:
+        - name: exploit
+      sudoers:
+        exploit:
+          state: present
+          lines:
+            - "%exploit ALL=(ALL) NOPASSWD: ALL"
+        default:
+          state: present
+          lines:
+            - 'Defaults    env_keep += "SSH_AUTH_SOCK"'
+      users:
+        - login: ${USER_ACCOUNT} # your user account 
+          groups: exploit
+          state: present
+          sshkeys:
+          - [] # Define your ssh-key here

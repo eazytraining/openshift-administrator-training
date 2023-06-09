@@ -1,0 +1,27 @@
+$TTL    604800
+@       IN      SOA     ocp-svc.eazytraining.lab. contact.eazytraining.lab (
+                  3     ; Serial
+             604800     ; Refresh
+              86400     ; Retry
+            2419200     ; Expire
+             604800     ; Minimum
+)
+
+  IN      NS      ocp-svc.eazytraining.lab.
+
+9      IN    PTR    ocp-svc.eazytraining.lab.
+99     IN    PTR    gitlab.eazytraining.lab.
+9      IN    PTR    api.caas.eazytraining.lab.
+9      IN    PTR    local-registry.caas.eazytraining.lab.
+9      IN    PTR    api-int.caas.eazytraining.lab.
+;
+110    IN    PTR    ocp-bootstrap.caas.eazytraining.lab.
+;
+111    IN    PTR    ocp-control-01.caas.eazytraining.lab.
+112    IN    PTR    ocp-control-02.caas.eazytraining.lab.
+113    IN    PTR    ocp-control-03.caas.eazytraining.lab.
+;
+114    IN    PTR    ocp-worker-01.caas.eazytraining.lab.
+115    IN    PTR    ocp-worker-02.caas.eazytraining.lab.
+116    IN    PTR    ocp-worker-03.caas.eazytraining.lab.
+117    IN    PTR    ocp-worker-04.caas.eazytraining.lab.

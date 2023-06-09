@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ${REGISTRY_PV_NAME}
+spec:
+  accessModes:
+    - ReadWriteMany
+  capacity:
+    storage: ${REGISTRY_SIZE}Gi
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /shares/registry
+    server: 192.168.110.9

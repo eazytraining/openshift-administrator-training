@@ -1,0 +1,46 @@
+$TTL    604800
+@       IN      SOA     ocp-svc.eazytraining.lab. contact.eazytraining.lab (
+                  6     ; Serial
+             604800     ; Refresh
+              86400     ; Retry
+            2419200     ; Expire
+             604800     ; Minimum
+)
+        IN      NS      ocp-svc
+
+ocp-svc.eazytraining.lab.          IN      A       192.168.110.9
+local-registry.caas.eazytraining.lab.          IN      A       192.168.110.9
+gitlab.eazytraining.lab.           IN      A       192.168.110.99
+
+; Temp Bootstrap Node
+ocp-bootstrap.caas.eazytraining.lab.        IN      A      192.168.110.110
+
+; Control Plane Nodes
+ocp-control-01.caas.eazytraining.lab.         IN      A      192.168.110.111
+ocp-control-02.caas.eazytraining.lab.         IN      A      192.168.110.112
+ocp-control-03.caas.eazytraining.lab.         IN      A      192.168.110.113
+
+; Worker Nodes
+ocp-worker-01.caas.eazytraining.lab.        IN      A      192.168.110.114
+ocp-worker-02.caas.eazytraining.lab.        IN      A      192.168.110.115
+ocp-worker-03.caas.eazytraining.lab.        IN      A      192.168.110.116
+ocp-worker-04.caas.eazytraining.lab.        IN      A      192.168.110.117
+
+
+; OpenShift Internal - Load balancer
+api.caas.eazytraining.lab.        IN    A    192.168.110.9
+api-int.caas.eazytraining.lab.    IN    A    192.168.110.9
+*.apps.caas.eazytraining.lab.     IN    A    192.168.110.9
+
+; ETCD Cluster
+etcd-0.caas.eazytraining.lab.    IN    A     192.168.110.111
+etcd-1.caas.eazytraining.lab.    IN    A     192.168.110.112
+etcd-3.caas.eazytraining.lab.    IN    A     192.168.110.113
+
+; OpenShift Internal SRV records (cluster name = caas)
+_etcd-server-ssl._tcp.caas.eazytraining.lab.    86400     IN    SRV     0    10    2380    etcd-0.lab
+_etcd-server-ssl._tcp.caas.eazytraining.lab.    86400     IN    SRV     0    10    2380    etcd-1.lab
+_etcd-server-ssl._tcp.caas.eazytraining.lab.    86400     IN    SRV     0    10    2380    etcd-2.lab
+
+;oauth-openshift.apps.caas.eazytraining.lab.     IN     A     192.168.110.9
+;console-openshift-console.apps.caas.eazytraining.lab.     IN     A     192.168.110.9
