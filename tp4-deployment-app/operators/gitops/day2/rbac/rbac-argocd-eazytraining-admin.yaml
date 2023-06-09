@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-rbac-cm
+  namespace: openshift-gitops
+data:
+  policy.default: role:readonly
+  policy.csv: |
+    p, role:eazytraining-admin, applicationsets, *, */*, allow
+    p, role:eazytraining-admin, projects, *, */*, allow
+    p, role:eazytraining-admin, certificates, *, */*, allow
+    p, role:eazytraining-admin, applications, *, */*, allow
+    p, role:eazytraining-admin, clusters, *, */*, allow
+    p, role:eazytraining-admin, repositories, *, */*, allow
+    p, role:eazytraining-admin, logs, get, *, allow
+    p, role:eazytraining-admin, exec, create, */*, allow
+    g, eazytraining-admin, role:eazytraining-admin

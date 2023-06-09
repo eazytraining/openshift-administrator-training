@@ -24,7 +24,89 @@ cat s2i/sample-app-httpd/openshift/templates/gitlab-secret-webhook.yaml | envsub
 oc describe bc <name>
 ```
 - Copy the webhook URL, replacing <secret> with your secret value.
-- Follow the GitLab setup instructions (https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#webhooks) to paste the webhook URL into your GitLab repository settings.
+- Follow the [GitLab setup instructions](https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#webhooks) to paste the webhook URL into your GitLab repository settings.
 
 
 The script `s2i/sample-app-httpd/cleanall.sh` allows you to delete all the resources.  
+
+
+## Application deployment through Gitops model. 
+
+### Operators installation
+
+#### Build the Operators Catalog Source 
+
+Required tool: 
+- [opm](https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.10.0/opm-linux-4.10.0.tar.gz)
+- [kustomize](https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/)
+
+Disable the default OperatorHub sources
+```sh
+oc patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
+```
+
+```sh 
+# download and extract the opm utility
+cd ~/ocp && wget https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/4.10.0/opm-linux-4.10.0.tar.gz
+tar -zxf opm-linux-4.10.0.tar.gz
+mv opm /usr/local/bin/
+
+# check if opm is installed
+opm version
+```
+
+Authenticate with registry.redhat.io 
+```sh 
+podman login registry.redhat.io --authfile /root/mirroring/pull-secret.json
+```
+
+Authenticate with the target registry
+```sh
+podman login local-registry.caas.eazytraining.lab:5000 --authfile /root/mirroring/pull-secret.json
+```
+
+Prune the source index of all but the specified packages
+```sh
+opm index prune \
+-f registry.redhat.io/redhat/redhat-operator-index:v4.10 \
+-p cluster-logging,openshift-gitops-operator,elasticsearch-operator\
+,devspaces,devworkspace-operator,serverless-operator,servicemeshoperator\
+,openshift-pipelines-operator-rh,vertical-pod-autoscaler,redhat-oadp-operator\
+,kiali-ossm,jaeger-product,cincinnati-operator \
+-t local-registry.caas.eazytraining.lab:5000/olm/redhat-operator-index:v4.10
+```
+
+Push the new index image to the target registry
+```sh
+podman push local-registry.caas.eazytraining.lab:5000/olm/redhat-operator-index:v4.10
+```
+
+Add the catalog source to the cluster
+```sh 
+oc apply -f ~/openshift-administrator-training/okd-upi-install/manifests/catalogSource.yaml
+```
+
+
+#### OpenShift Pipelines 
+```sh 
+cd operators/pipelines
+kustomize build | oc apply -f - 
+```
+
+After issuing these commands, please proceed to the InstallPlan manual approval. 
+
+
+#### OpenShift Pipelines 
+```sh 
+cd operators/gitops
+kustomize build | oc apply -f - 
+```
+
+After issuing these commands, please proceed to the InstallPlan manual approval. The installation of this operator will create implicitly a new namespace `openshift-gitops` where control plane workloads would be instantiated. 
+It may be necessary to check if pods are running properly. 
+
+##### Day2 prerequisites
+
+Manifests located into day2 folder set up the following features: 
+- Swicthing of control plane workloads on infra nodes
+- RBAC for eazytraining-admin users group
