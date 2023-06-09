@@ -8,9 +8,9 @@ spec:
   - name: pipeline-name
     default: gitops-dev-pipeline
   - name: git-revision
-    default: develop
+    default: main
   - name: git-url
-    default: 'http://gitlab.eazytraining.lab/boass/eazytraining.git'
+    default: 'https://github.com/eazytraining/openshift-administrator-training.git'
   - name: image-name
     default: 'image-registry.openshift-image-registry.svc:5000/eazytraining/dck_eazytraining-lab-http:1.0'
   - name: target-namespace
