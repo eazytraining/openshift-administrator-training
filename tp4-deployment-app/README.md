@@ -119,7 +119,7 @@ Manifests located into day2 folder set up the following features:
 Before proceeding to the launch of the script `cicd/tekton/pipeline.sh`, it may be necessary to configure the secrets required for the service account  `pipeline-bot`
 
 ```sh
-export GITLAB_HOST_FQDN=<gitlab-server-fqdn>
+export GITHUB_HOST_FQDN=<gitlab-server-fqdn>
 export BASE64_PRIVATE_SSH_KEY=<ssh-private-key-user-base64>
 export BASE64_KNOWN_HOSTS=<ssh-public-key-gitlab-base64>
 
