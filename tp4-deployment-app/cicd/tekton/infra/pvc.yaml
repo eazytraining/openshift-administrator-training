@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: builder-pvc
+spec:
+  resources:
+    requests:
+      storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Delete
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: git-update-pvc
+spec:
+  resources:
+    requests:
+      storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Delete

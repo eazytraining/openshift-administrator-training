@@ -1,0 +1,14 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: gitops-dev-elistener
+  namespace: eazytraining
+spec: 
+  serviceAccountName: pipeline
+  triggers: 
+  - bindings: 
+    - kind: ClusterTriggerBinding 
+      ref: gitlab-push 
+    name: trigger-1
+    template: 
+      ref: gitops-dev-trigger

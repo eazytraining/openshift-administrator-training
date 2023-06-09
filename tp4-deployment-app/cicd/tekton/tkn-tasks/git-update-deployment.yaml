@@ -1,0 +1,90 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  annotations:
+    tekton.dev/pipelines.minVersion: 0.12.1
+    tekton.dev/tags: git
+  name: git-update-deployment
+  labels:
+    app.kubernetes.io/version: '0.2'
+    operator.tekton.dev/provider-type: community
+spec:
+  description: This Task can be used to update image digest in a Git repo using kustomize. It requires a secret with credentials for accessing the git repo.
+  params:
+    - name: GIT_REPOSITORY
+      type: string
+    - name: CURRENT_IMAGE
+      type: string
+    - name: NEW_IMAGE
+      type: string
+    - name: NEW_DIGEST
+      type: string
+    - name: KUSTOMIZATION_PATH
+      type: string
+    - name: GIT_USER_NAME
+      type: string
+    - name: GIT_PASSWORD
+      type: string
+    - name: GIT_USER_EMAIL
+      type: string
+
+  workspaces:
+    - description: The workspace consisting of source code files.
+      name: kustomize
+    - description: The workspace holding ssh git repo credentials.
+      name: git-auth-dir
+
+  results:
+    - name: commit
+      description: The commit SHA
+
+  steps:
+
+    - name: git-clone
+      image: docker.io/alpine/git:latest
+      workingDir: $(workspaces.kustomize.path)
+      script: |
+        rm -rf git-update-digest-work-dir
+        git clone $(params.GIT_REPOSITORY) git-update-digest-work-dir
+
+    - name: update-digest
+      image: quay.io/wpernath/kustomize-ubi:latest
+      workingDir: $(workspaces.kustomize.path)
+      script: |
+        cd git-update-digest-work-dir/$(params.KUSTOMIZATION_PATH)
+        kustomize edit set image $(params.CURRENT_IMAGE)=$(params.NEW_IMAGE)@$(params.NEW_DIGEST)
+
+        echo "##########################"
+        echo "### kustomization.yaml ###"
+        echo "##########################"
+        cat kustomization.yaml
+
+    - name: git-commit
+      image: docker.io/alpine/git:latest
+      workingDir: $(workspaces.kustomize.path)
+      script: | 
+        #!/usr/bin/env ash
+        set -xe
+
+        ln -s /tekton/home/.ssh /root/.ssh
+
+        cd git-update-digest-work-dir
+        
+        git config --global --add safe.directory $(workspaces.kustomize.path)/git-update-digest-work-dir
+        
+        git config user.email "borisassogba@live.fr"
+        git config user.name "My Tekton Bot"
+
+        git status
+        git add $(params.KUSTOMIZATION_PATH)/kustomization.yaml
+        git commit -m "[ci] Image digest updated"
+        git push origin main
+
+        RESULT_SHA="$(git rev-parse HEAD | tr -d '\n')"
+        EXIT_CODE="$?"
+        if [ "$EXIT_CODE" != 0 ]
+        then
+          exit $EXIT_CODE
+        fi
+        # Make sure we don't add a trailing newline to the result!
+        echo -n "$RESULT_SHA" > $(results.commit.path)

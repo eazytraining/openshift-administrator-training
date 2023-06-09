@@ -1,0 +1,30 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: extract-sample-httpd-digest
+  labels:
+    app.kubernetes.io/version: "0.1"
+  annotations:
+    tekton.dev/pipelines.minVersion: "0.12.1"
+    tekton.dev/tags: build-tool
+
+spec:
+  results:
+    - name: DIGEST
+      description: The image digest of the last sample httpd build. 
+
+  workspaces:
+    - name: source
+      description: The workspace holding the cloned source files.
+
+  description: >-
+    This task can be used to extract the image digest of a sample httpd build.
+    The content of this file will be put into DIGEST result
+  steps:
+    - name: extract-digest
+      image: quay.io/wpernath/kustomize-ubi:latest
+      script: |
+        DIGEST=$(cat $(workspaces.source.path)/image-digest)
+        echo " DIGEST: $DIGEST"
+        echo
+        echo -n $DIGEST > $(results.DIGEST.path)

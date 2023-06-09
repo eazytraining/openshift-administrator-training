@@ -1,6 +1,6 @@
 ## Application deployment through S2I model. 
 
-The script `s2i/sample-app-httpd/sample-app-httpd.sh` allows you to deploy a CI/CD pipeline based on the S2I approach. It will create the following resources : 
+The following script `s2i/sample-app-httpd/sample-app-httpd.sh` allows you to deploy a CI/CD pipeline based on the S2I approach. It will create the following resources : 
 - namespace 
 - build config
 - deployment config 
@@ -110,3 +110,42 @@ It may be necessary to check if pods are running properly.
 Manifests located into day2 folder set up the following features: 
 - Swicthing of control plane workloads on infra nodes
 - RBAC for eazytraining-admin users group
+
+
+### Application Deployment 
+
+#### Application Build 
+
+Before proceeding to the launch of the script `cicd/tekton/pipeline.sh`, it may be necessary to configure the secrets required for the service account  `pipeline-bot`
+
+```sh
+export GITLAB_HOST_FQDN=<gitlab-server-fqdn>
+export BASE64_PRIVATE_SSH_KEY=<ssh-private-key-user-base64>
+export BASE64_KNOWN_HOSTS=<ssh-public-key-gitlab-base64>
+
+export GIT_USERNAME=<clear-username>
+export GIT_PASSWORD=<clear-password>
+
+cat cicd/tekton/infra/secret-ssh-yaml | envsubst | oc apply -f - 
+cat cicd/tekton/infra/secret-basic-auth.yaml | envsubst | oc apply -f - 
+```
+
+The following script `cicd/tekton/pipeline.sh` deploy several required resources for building the CI pipeline. 
+
+
+1. Deploy the necessary files into the current project 
+
+```sh
+sh cicd/tekton/pipeline.sh init 
+```
+
+2. Trigger manually a PipelineRun
+
+```sh 
+sh cicd/tekton/pipeline.sh start
+```
+
+In order to control the circumstances in which the tekton pipeline should run, a webhook configured at the GitLab server is mandatory. To configure the GitLab webhook, you should : 
+
+- Get the host URL of the EventListener (`oc get route <eventlistener-name> <target-namespace> -o json | jq -r '.spec.host'`)
+- Copy the host URL of the EventListener and follow the [GitLab setup instructions](https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#webhooks) to paste the webhook URL into your GitLab repository settings.

@@ -1,0 +1,47 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: gitops-dev-trigger
+  namespace: eazytraining
+spec: 
+  params: 
+  - name: pipeline-name
+    default: gitops-dev-pipeline
+  - name: git-revision
+    default: develop
+  - name: git-url
+    default: 'http://gitlab.eazytraining.lab/boass/eazytraining.git'
+  - name: image-name
+    default: 'image-registry.openshift-image-registry.svc:5000/eazytraining/dck_eazytraining-lab-http:1.0'
+  - name: target-namespace
+    default: eazytraining
+  - name: git-password
+    default: 'BuzzMusic_2023'
+  resourcetemplates: 
+  - apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      generateName: gitops-dev-pipeline-run
+    spec: 
+      pipelineRef:
+        name: gitops-dev-pipeline
+      params:
+        - name: git-url
+          value: $(tt.params.git-url)
+        - name: git-revision
+          value: $(tt.params.git-revision)
+        - name: image-name
+          value: $(tt.params.image-name)
+        - name: target-namespace
+          value: $(tt.params.target-namespace)
+      serviceAccountName: pipeline-bot 
+      workspaces:
+        - name: shared-workspace
+          persistentVolumeClaim:
+            claimName: builder-pvc
+        - name: git-update-workspace
+          persistentVolumeClaim:
+            claimName: git-update-pvc
+        - name: git-credentials
+          secret: 
+            secretName: git-ssh-key
