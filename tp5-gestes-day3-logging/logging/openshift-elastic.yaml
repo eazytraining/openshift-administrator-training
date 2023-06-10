@@ -14,5 +14,5 @@ spec:
   channel: "stable-5.5"
   installPlanApproval: "Manual"
   name: "elasticsearch-operator"
-  source: "redhat-operator-index-4-10"
+  source: "redhat-operator-index"
   sourceNamespace: "openshift-marketplace"

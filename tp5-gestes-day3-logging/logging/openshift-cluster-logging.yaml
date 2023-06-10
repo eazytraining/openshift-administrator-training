@@ -16,5 +16,5 @@ spec:
   channel: "stable-5.5"
   installPlanApproval: "Manual"
   name: cluster-logging
-  source: "redhat-operator-index-4-10"
+  source: "redhat-operator-index"
   sourceNamespace: openshift-marketplace
