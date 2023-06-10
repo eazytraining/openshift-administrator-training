@@ -156,5 +156,5 @@ In order to control the circumstances in which the tekton pipeline should run, a
 Create the ArgoCD application for deployment the application. 
 
 ```sh 
-oc apply -f~/openshift-administrator-training/tp4-deployment-app/argo/app.yaml
+oc apply -f ~/openshift-administrator-training/tp4-deployment-app/argo/app.yaml
 ```

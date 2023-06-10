@@ -1,0 +1,61 @@
+apiVersion: logging.openshift.io/v1
+kind: ClusterLogging
+metadata:
+  name: instance
+spec:
+  collection:
+    logs:
+      fluentd: {}
+      type: fluentd
+  curation:
+    curator:
+      schedule: 30 3 * * *
+    type: curator
+  forwarder:
+    fluentd:
+      buffer:
+        chunkLimitSize: 8m
+        flushInterval: 5s
+        flushMode: interval
+        flushThreadCount: 4
+        overflowAction: throw_exception
+        retryMaxInterval: 300s
+        retryType: periodic
+        retryWait: 1s
+        totalLimitSize: 32m
+  logStore:
+    elasticsearch:
+      nodeCount: 3
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+      proxy:
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            memory: 256Mi
+      redundancyPolicy: SingleRedundancy
+      resources:
+        limits:
+          memory: 4Gi
+        requests:
+          cpu: 2
+          memory: 4Gi
+      storage:
+        size: 200Gi
+        storageClassName: managed-nfs-storage
+    retentionPolicy:
+      application:
+        maxAge: 20d
+      audit:
+        maxAge: 7d
+      infra:
+        maxAge: 20d
+    type: elasticsearch
+  managementState: Managed
+  visualization:
+    kibana:
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+      replicas: 2
+    type: kibana
