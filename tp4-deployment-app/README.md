@@ -116,7 +116,16 @@ Manifests located into day2 folder set up the following features:
 
 #### Build & Push
 
-Before proceeding to the launch of the script `cicd/tekton/pipeline.sh`, it may be necessary to configure the secrets required for the service account  `pipeline-bot`
+The following script `cicd/tekton/pipeline.sh` deploy several required resources for building the CI pipeline. 
+
+
+1. Deploy the necessary files into the current project 
+
+```sh
+sh cicd/tekton/pipeline.sh init 
+```
+
+Before proceeding to the launch of the first pipeline run, it may be necessary to configure the secrets required for the service account `pipeline-bot`
 
 ```sh
 export GITHUB_HOST_FQDN=<gitlab-server-fqdn>
@@ -128,15 +137,6 @@ export GIT_PASSWORD=<clear-password>
 
 cat cicd/tekton/infra/secret-ssh-yaml | envsubst | oc apply -f - 
 cat cicd/tekton/infra/secret-basic-auth.yaml | envsubst | oc apply -f - 
-```
-
-The following script `cicd/tekton/pipeline.sh` deploy several required resources for building the CI pipeline. 
-
-
-1. Deploy the necessary files into the current project 
-
-```sh
-sh cicd/tekton/pipeline.sh init 
 ```
 
 2. Trigger manually a PipelineRun
