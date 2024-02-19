@@ -12,7 +12,7 @@
 **OKD VMs**
 |          VM             |  CPU | Memory |     OS            |    IP Address         | Disk (GB) |
 |-------------------------|------|--------|-------------------|-----------------------|-----------|
-|     Bastion             |   4  |    4   |  Alma Linux 8.7   |  192.168.110.9        |     450   |
+|     Bastion             |   4  |    4   |  Alma Linux 8.8   |  192.168.110.9        |     450   |
 |     Master-[1-3]        |   6  |    10  |  Fedora CoreOS 37 |  192.168.110.[111-113]|     60    |
 |     Worker-[1-4]        |   8  |    12  |  Fedora CoreOS 37 |  192.168.110.[114-117]|     60    | 
 |     Bootstrap           |   4  |    8   |  Fedora CoreOS 37 |  192.168.110.110      |     40    |
@@ -21,7 +21,7 @@
 ## Download Software
 ***
 
-1. Download [Alma Linux 8.7](http://mirror.almalinux.ikoula.com/8.7/isos/x86_64/AlmaLinux-8.7-x86_64-minimal.iso) for installing the bastion node
+1. Download [Alma Linux 8.8](http://mirror.almalinux.ikoula.com/8.8/isos/x86_64/AlmaLinux-8.8-x86_64-minimal.iso) for installing the bastion node
 2. Download the following files
     -  [FCOS 37 Build 37.20230205.3.0](https://builds.coreos.fedoraproject.org/browser?stream=stable&arch=x86_64)
         - [kernel](https://builds.coreos.fedoraproject.org/prod/streams/stable/builds/37.20230205.3.0/x86_64/fedora-coreos-37.20230205.3.0-live-kernel-x86_64)
@@ -91,13 +91,13 @@ firewall-cmd --list-all --zone=internal
 firewall-cmd --list-all --zone=public
 ```
 
-4. Download the Alma Linux 8.7 iso image to the dedicated pool on the host server. <br>
+4. Download the Alma Linux 8.8 iso image to the dedicated pool on the host server. <br>
 ```sh
 mkdir -p /var/lib/libvirt/pool/ssd/iso && cd /var/lib/libvirt/pool/ssd/iso
-wget http://mirror.almalinux.ikoula.com/8.7/isos/x86_64/AlmaLinux-8.7-x86_64-minimal.iso
+wget http://mirror.almalinux.ikoula.com/8.8/isos/x86_64/AlmaLinux-8.8-x86_64-minimal.iso
 ```
 
-5. Create the Bastion node server and install Alma Linux 8.7
+5. Create the Bastion node server and install Alma Linux 8.8
 
 Clone the repository
 ```sh
