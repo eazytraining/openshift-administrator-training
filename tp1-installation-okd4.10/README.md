@@ -44,6 +44,7 @@ EOF
 
 2. Deploy the basic configuration to the Bastion server
 ```sh
+cp -r ~/openshift-administrator-training/okd-upi-install/ansible-roles/* ansible/roles
 cp ~/openshift-administrator-training/okd-upi-install/manifests/basic-server.yaml ~/ansible/playbook
 ```
 
