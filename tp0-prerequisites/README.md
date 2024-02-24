@@ -81,6 +81,7 @@ systemctl restart libvirtd
 
 3. Configure the network interfaces and the firewall 
 ```sh
+service NetworkManager restart
 nmcli connection modify ocpnet connection.zone internal
 nmcli connection modify 'System enp4s0' connection.zone public
 firewall-cmd --get-active-zones
